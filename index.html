@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <link rel="stylesheet" href="style[1].css">
+
+<meta charset="UTF-8">
+<title>Timetable Manager</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+  background-color: #f4f6f8;
+  color: #333;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+h1, h2, h3 {
+  text-align: center;
+  color: #2c3e50;
+}
+input, button {
+  margin: 5px 0;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #2980b9;
+}
+.section {
+  margin-bottom: 30px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+table, th, td {
+  border: 1px solid #ccc;
+}
+th, td {
+  padding: 10px;
+  text-align: center;
+}
+#classes button {
+  margin: 3px 0;
+}
+pre {
+  background-color: #ecf0f1;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>📚 Timetable Manager</h1>
+
+<div class="section">
+<h2>Add Teacher</h2>
+<input type="text" id="teacherName" placeholder="Teacher Name">
+<button onclick="addTeacher()">Add Teacher</button>
+<p id="teacherResult"></p>
+</div>
+
+<div class="section">
+<h2>Add Class</h2>
+<input type="text" id="classTime" placeholder="Slot Time (e.g., 09:00–10:00)">
+<button onclick="addClass()">Add Class</button>
+<p id="classResult"></p>
+</div>
+
+<div class="section">
+<h2>Book Class</h2>
+<input type="number" id="bookClassId" placeholder="Class ID">
+<input type="number" id="bookTeacherId" placeholder="Teacher ID">
+<button onclick="bookClass()">Book Class</button>
+<p id="bookResult"></p>
+</div>
+
+<div class="section">
+<h2>Free Classes</h2>
+<div id="classes"></div>
+<pre id="freeClasses"></pre>
+</div>
+
+<div class="section">
+<h2>All Classes / Timetable</h2>
+<table id="timetable">
+  <thead>
+    <tr>
+      <th>Class ID</th>
+      <th>Slot Time</th>
+      <th>Booked By</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+</div>
+
+<script>
+const BASE_URL = "http://localhost:5000";
+const teacherId = 1; // demo teacher for booking from teacher dashboard
+
+// --- Backend Functions ---
+function addTeacher() {
+  const name = document.getElementById("teacherName").value;
+  fetch(`${BASE_URL}/teachers/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("teacherResult").innerText = JSON.stringify(data, null, 2);
+    loadClasses();
+  })
+  .catch(err => console.error(err));
+}
+
+function addClass() {
+  const slot_time = document.getElementById("classTime").value;
+  fetch(`${BASE_URL}/classes/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slot_time })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("classResult").innerText = JSON.stringify(data, null, 2);
+    loadClasses();
+  })
+  .catch(err => console.error(err));
+}
+
+function bookClassManual() {
+  const class_id = parseInt(document.getElementById("bookClassId").value);
+  const teacher_id = parseInt(document.getElementById("bookTeacherId").value);
+  bookClassAPI(class_id, teacher_id);
+}
+
+function bookClassAPI(classId, teacher_id=teacherId) {
+  fetch(`${BASE_URL}/classes/book`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ class_id: classId, teacher_id })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Class booked successfully: " + classId);
+      loadClasses();
+    } else {
+      alert("Error: " + data.error);
+    }
+  })
+  .catch(err => console.error(err));
+}
+
+// --- Load Free Classes and Timetable ---
+function loadClasses() {
+  // Free Classes
+  fetch(`${BASE_URL}/classes/free`)
+    .then(res => res.json())
+    .then(data => {
+      const div = document.getElementById("classes");
+      div.innerHTML = "";
+      if (data.length === 0) {
+        div.innerHTML = "<p>No free classes available.</p>";
+      } else {
+        data.forEach(cls => {
+          const btn = document.createElement("button");
+          btn.innerText = "Book " + cls.slot_time + " (ID: " + cls.class_id + ")";
+          btn.onclick = () => bookClassAPI(cls.class_id);
+          div.appendChild(btn);
+          div.appendChild(document.createElement("br"));
+        });
+      }
+    });
+
+  // All Classes / Timetable
+  fetch(`${BASE_URL}/classes/all`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.querySelector("#timetable tbody");
+      tbody.innerHTML = "";
+      data.forEach(cls => {
+        const teacherName = cls.teacher_name ? cls.teacher_name : "Free";
+        const row = `<tr>
+          <td>${cls.class_id}</td>
+          <td>${cls.slot_time}</td>
+          <td>${teacherName}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    });
+}
+
+// Initialize on page load
+loadClasses();
+</script>
+
+</body>
+</html>

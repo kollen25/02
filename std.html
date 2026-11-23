@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Timetable Manager</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+  background: #f4f6f8;
+  color: #333;
+  background-image: url('https://imgs.search.brave.com/kZ7FY2bHkdbLqqmqhmh1DGkDctJTL8_SQopwS2pZG6E/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/dmVjdG9yc3RvY2su/Y29tL2kvNTAwcC82/Ny80Mi9ibGFjay1j/bG9jay1iYWNrZ3Jv/dW5kLXZlY3Rvci03/MzY3NDIuanBn');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+h1, h2, h3 {
+  text-align: center;
+  color: #2c3e50;
+}
+input, select, button {
+  margin: 5px 0;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  background: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background: #2980b9;
+}
+.section {
+  margin-bottom: 30px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+table, th, td {
+  border: 1px solid #ccc;
+}
+th, td {
+  padding: 10px;
+  text-align: center;
+}
+#classes button {
+  margin: 3px 0;
+}
+pre {
+  background: #ecf0f1;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📚 Timetable Manager</h1>
+  
+  <!-- TT Matrix Static Timetable -->
+  <h2>B.TECH ECE (SEM 1)</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>09:00-10:00</th>
+          <th>10:00-11:00</th>
+          <th>11:00-12:00</th>
+          <th>Break</th>
+          <th>13:00-14:00</th>
+          <th>14:00-15:00</th>
+          <th>15:00-16:00</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Day 1</td>
+          <td>FCS<br><small>Syed Amiruddin</small></td>
+          <td>TOC<br><small>Rinkaj Goyal</small></td>
+          <td>EDC<br><small>Gautam Anand</small></td>
+          <td></td>
+          <td></td>
+          <td>EDC<br><small>Gautam Anand</small></td>
+          <td>FCS<br><small>Syed Amiruddin</small></td>
+        </tr>
+        <tr>
+          <td>Day 2</td>
+          <td></td>
+          <td>Java<br><small>Sonoo Jaiswal</small></td>
+          <td>FCS<br><small>Syed Amiruddin</small></td>
+          <td></td>
+          <td>EDC<br><small>Gautam Anand</small></td>
+          <td>FCS<br><small>Syed Amiruddin</small></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Day 3</td>
+          <td></td>
+          <td></td>
+          <td>Java<br><small>Sonoo Jaiswal</small></td>
+          <td></td>
+          <td>TOC<br><small>Rinkaj Goyal</small></td>
+          <td>Java<br><small>Sonoo Jaiswal</small></td>
+          <td>EDC<br><small>Gautam Anand</small></td>
+        </tr>
+        <tr>
+          <td>Day 4</td>
+          <td></td>
+          <td>Java<br><small>Sonoo Jaiswal</small></td>
+          <td>FCS<br><small>Syed Amiruddin</small></td>
+          <td></td>
+          <td>Java<br><small>Sonoo Jaiswal</small></td>
+          <td>FCS<br><small>Syed Amiruddin</small></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Day 5</td>
+          <td>EDC<br><small>Gautam Anand</small></td>
+          <td>TOC<br><small>Rinkaj Goyal</small></td>
+          <td>TOC<br><small>Rinkaj Goyal</small></td>
+          <td></td>
+          <td>TOC<br><small>Rinkaj Goyal</small></td>
+          <td>Java<br><small>Sonoo Jaiswal</small></td>
+          <td>EDC<br><small>Gautam Anand</small></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Dynamic Booking UI -->
+  <div class="section">
+    <h2>Free Classes</h2>
+    <div id="classes"></div>
+  </div>
+  <div class="section">
+    <h2>All Classes / Timetable</h2>
+    <table id="timetable">
+      <thead>
+        <tr><th>Class ID</th><th>Slot Time</th><th>Booked By</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+<script>
+const BASE_URL = "http://localhost:5000";
+
+function loadData() {
+  // Teachers dropdown
+  fetch(`${BASE_URL}/teachers/all`).then(r=>r.json()).then(data=>{
+    const tSel = document.getElementById("bookTeacherId");
+    if (tSel) {
+      tSel.innerHTML="";
+      data.forEach(t=>{
+        const opt = document.createElement("option");
+        opt.value=t.teacher_id; opt.text=t.name; tSel.appendChild(opt);
+      });
+    }
+  });
+
+  // Free classes
+  fetch(`${BASE_URL}/classes/free`).then(r=>r.json()).then(data=>{
+    const cSel = document.getElementById("bookClassId");
+    if (cSel) cSel.innerHTML="";
+    const div = document.getElementById("classes");
+    div.innerHTML="";
+    if(data.length===0) div.innerHTML="<p>No free classes available.</p>";
+    data.forEach(cls=>{
+      if (cSel) {
+        const opt = document.createElement("option");
+        opt.value=cls.class_id; opt.text=cls.slot_time; cSel.appendChild(opt);
+      }
+      const btn = document.createElement("button");
+      btn.innerText="Book "+cls.slot_time+" (ID:"+cls.class_id+")";
+      btn.onclick=()=>bookClassManualDirect(cls.class_id);
+      div.appendChild(btn); div.appendChild(document.createElement("br"));
+    });
+  });
+
+  // Timetable
+  fetch(`${BASE_URL}/classes/all`).then(r=>r.json()).then(data=>{
+    const tbody = document.querySelector("#timetable tbody");
+    tbody.innerHTML="";
+    data.forEach(cls=>{
+      const teacherName = cls.teacher_name ? cls.teacher_name : "Free";
+      tbody.innerHTML+=`<tr><td>${cls.class_id}</td><td>${cls.slot_time}</td><td>${teacherName}</td></tr>`;
+    });
+  });
+}
+
+function bookClassManualDirect(class_id) {
+  const teacher_id = parseInt(document.getElementById("bookTeacherId").value);
+  fetch(`${BASE_URL}/classes/book`, {
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({class_id, teacher_id})
+  }).then(res=>res.json()).then(data=>{
+    if(data.success){ alert("Class booked!"); loadData(); }
+    else alert("Error: "+data.error);
+  });
+}
+
+window.onload = loadData;
+</script>
+</body>
+</html>

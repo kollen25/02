@@ -4,14 +4,24 @@
   <title>Smart Timetable</title>
   <h1 text-color: white>Welcome to Smart Timetable Maker</h1>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 100px;
-           background-image: url('https://t4.ftcdn.net/jpg/10/27/39/97/360_F_1027399706_jJKdjGiJUGclpK2BE3vIyLFVywkndCb6.jpg');
-           background-size: cover;       
-           background-repeat: no-repeat;}
-    button { padding: 15px 30px; margin: 10px; font-size: 18px; cursor: pointer; }
+    
   </style>
 </head>
 <body>
+  <div id="register" class="section" style="display:none;"> <h2>Регистрация</h2> 
+    <input type="text" id="regName" placeholder="Имя" required> 
+    <input type="email" id="regEmail" placeholder="Email" required> 
+    <input type="password" id="regPassword" placeholder="Пароль" required> 
+    <button onclick="register()">Зарегистрироваться</button> </div> <!-- Форма входа --> 
+    <div id="login" class="section" style="display:none;"> <h2>Вход</h2> 
+      <input type="email" id="loginEmail" placeholder="Email" required> 
+      <input type="password" id="loginPassword" placeholder="Пароль" required> 
+      <button onclick="login()">Войти</button> </div> <!-- Форма обратной связи --> 
+      <div id="feedback" class="section" style="display:none;"> <h2>Обратная связь</h2> 
+        <input type="text" id="feedbackName" placeholder="Ваше имя" required> 
+        <textarea id="feedbackMessage" placeholder="Ваше сообщение..." required></textarea>
+         <button onclick="sendFeedback()">Отправить</button> 
+  </div>
   <button onclick="location.href='std.html'">I am a Student</button>
   <button onclick="location.href='index.html'">I am a Teacher</button>
 </body>

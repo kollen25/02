@@ -10,11 +10,22 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.18.2",
+    "mysql2": "^3.24.6",
     "sqlite3": "^5.1.7"
   },
-  "description": ""
+  "description": "\"SMART CLASSROOM & TIMETABLE MAKER\"",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kollen25/02.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kollen25/02/issues"
+  },
+  "homepage": "https://github.com/kollen25/02#readme"
 }

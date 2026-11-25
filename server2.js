@@ -8,8 +8,13 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname)));
+// Главная страница — reg.html (стоит ДО статики, чтобы не перехватывалась)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "reg.html"));
+});
+
+// Serve static files (index: false — чтобы static не отдавал index.html на "/")
+app.use(express.static(path.join(__dirname), { index: false }));
 
 // Connect to SQLite DB
 const db = new sqlite3.Database("./timetable.db");
@@ -31,10 +36,6 @@ db.serialize(() => {
 });
 
 // --- HTML Routes ---
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html")); // default
-});
-
 app.get("/student", (req, res) => {
   res.sendFile(path.join(__dirname, "student.html")); // student page
 });
@@ -108,5 +109,6 @@ app.get("/classes/all", (req, res) => {
   });
 });
 
-const PORT = 5000;
+const PORT = 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+

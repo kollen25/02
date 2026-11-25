@@ -68,44 +68,44 @@ pre {
 <body>
 
 <div class="container">
-<h1>📚 Timetable Manager</h1>
+<h1>📚 Управление расписанием</h1>
 
 <div class="section">
-<h2>Add Teacher</h2>
+<h2>Добавить учителя</h2>
 <input type="text" id="teacherName" placeholder="Teacher Name">
-<button onclick="addTeacher()">Add Teacher</button>
+<button onclick="addTeacher()">Добавить</button>
 <p id="teacherResult"></p>
 </div>
 
 <div class="section">
-<h2>Add Class</h2>
+<h2>Добавить класс</h2>
 <input type="text" id="classTime" placeholder="Slot Time (e.g., 09:00–10:00)">
-<button onclick="addClass()">Add Class</button>
+<button onclick="addClass()">Добавить</button>
 <p id="classResult"></p>
 </div>
 
 <div class="section">
-<h2>Book Class</h2>
+<h2>Забронированный класс</h2>
 <input type="number" id="bookClassId" placeholder="Class ID">
 <input type="number" id="bookTeacherId" placeholder="Teacher ID">
-<button onclick="bookClass()">Book Class</button>
+<button onclick="bookClass()">Забронированный класс</button>
 <p id="bookResult"></p>
 </div>
 
 <div class="section">
-<h2>Free Classes</h2>
+<h2>Свободные классы</h2>
 <div id="classes"></div>
 <pre id="freeClasses"></pre>
 </div>
 
 <div class="section">
-<h2>All Classes / Timetable</h2>
+<h2>Все классы</h2>
 <table id="timetable">
   <thead>
     <tr>
-      <th>Class ID</th>
-      <th>Slot Time</th>
-      <th>Booked By</th>
+      <th>Айди</th>
+      <th>Слот</th>
+      <th>Забронирован?</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -114,13 +114,12 @@ pre {
 </div>
 
 <script>
-const BASE_URL = "http://localhost:3000";
-const teacherId = 1; // demo teacher for booking from teacher dashboard
+// Теперь используем относительные пути — браузер сам подставит http://localhost:3000
+const teacherId = 1; // демо-преподаватель для ручного бронирования
 
-// --- Backend Functions ---
 function addTeacher() {
   const name = document.getElementById("teacherName").value;
-  fetch(`${BASE_URL}/teachers/add`, {
+  fetch('/api/teachers/add', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name })
@@ -135,7 +134,7 @@ function addTeacher() {
 
 function addClass() {
   const slot_time = document.getElementById("classTime").value;
-  fetch(`${BASE_URL}/classes/add`, {
+  fetch('/api/classes/add', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ slot_time })
@@ -148,14 +147,8 @@ function addClass() {
   .catch(err => console.error(err));
 }
 
-function bookClassManual() {
-  const class_id = parseInt(document.getElementById("bookClassId").value);
-  const teacher_id = parseInt(document.getElementById("bookTeacherId").value);
-  bookClassAPI(class_id, teacher_id);
-}
-
-function bookClassAPI(classId, teacher_id=teacherId) {
-  fetch(`${BASE_URL}/classes/book`, {
+function bookClassAPI(classId, teacher_id = teacherId) {
+  fetch('/api/classes/book', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ class_id: classId, teacher_id })
@@ -163,55 +156,79 @@ function bookClassAPI(classId, teacher_id=teacherId) {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      alert("Class booked successfully: " + classId);
+      alert("Класс забронирован: " + classId);
       loadClasses();
     } else {
-      alert("Error: " + data.error);
+      alert("Ошибка: " + data.error);
     }
   })
   .catch(err => console.error(err));
 }
 
-// --- Load Free Classes and Timetable ---
+// Обработчик нажатия кнопки «Book Class»
+function bookClass() {
+  const class_id = parseInt(document.getElementById("bookClassId").value);
+  const teacher_id = parseInt(document.getElementById("bookTeacherId").value);
+  // Проверка ввода
+  if (!class_id || !teacher_id) {
+    alert('Укажите ID занятия и преподавателя');
+    return;
+  }
+  bookClassAPI(class_id, teacher_id);
+}
+
+function bookClassManual() {
+  const class_id = parseInt(document.getElementById("bookClassId").value);
+  const teacher_id = parseInt(document.getElementById("bookTeacherId").value);
+  bookClassAPI(class_id, teacher_id);
+}
+
 function loadClasses() {
-  // Free Classes
-  fetch(`${BASE_URL}/classes/free`)
+  // Свободные классы
+  fetch('/api/classes/free')
     .then(res => res.json())
     .then(data => {
       const div = document.getElementById("classes");
       div.innerHTML = "";
       if (data.length === 0) {
-        div.innerHTML = "<p>No free classes available.</p>";
+        div.innerHTML = "<p>Свободных занятий нет.</p>";
       } else {
         data.forEach(cls => {
           const btn = document.createElement("button");
-          btn.innerText = "Book " + cls.slot_time + " (ID: " + cls.class_id + ")";
+          btn.innerText = "Забронировать " + cls.slot_time + " (ID: " + cls.class_id + ")";
           btn.onclick = () => bookClassAPI(cls.class_id);
           div.appendChild(btn);
           div.appendChild(document.createElement("br"));
         });
       }
+    })
+    .catch(() => {
+      document.getElementById("classes").innerHTML = "<p>Не удалось загрузить свободные занятия.</p>";
     });
 
-  // All Classes / Timetable
-  fetch(`${BASE_URL}/classes/all`)
+  // Всё расписание
+  fetch('/api/classes/all')
     .then(res => res.json())
     .then(data => {
       const tbody = document.querySelector("#timetable tbody");
       tbody.innerHTML = "";
       data.forEach(cls => {
-        const teacherName = cls.teacher_name ? cls.teacher_name : "Free";
+        const teacherName = cls.teacher_name ? cls.teacher_name : "Свободно";
         const row = `<tr>
           <td>${cls.class_id}</td>
           <td>${cls.slot_time}</td>
           <td>${teacherName}</td>
         </tr>`;
-        tbody.innerHTML += row;
+        tbody.insertAdjacentHTML('beforeend', row);
       });
+    })
+    .catch(() => {
+      const tbody = document.querySelector("#timetable tbody");
+      tbody.innerHTML = "<tr><td colspan='3'>Не удалось загрузить расписание</td></tr>";
     });
 }
 
-// Initialize on page load
+// Загрузка при открытии страницы
 loadClasses();
 </script>
 

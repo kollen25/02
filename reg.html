@@ -1,111 +1,310 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Smart Timetable</title>
-    <h1 text-color: white>Welcome to Smart Timetable Maker</h1>
-    <style>
+  <meta charset="UTF-8">
+  <title>Smart Timetable</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    </style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    /* Вкладки */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .tabs button.active {
+      background: #fff;
+      color: #764ba2;
+      font-weight: bold;
+    }
+
+    /* Карточки-секции */
+    .section {
+      display: none;
+      background: #fff;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .section h2 {
+      margin-bottom: 18px;
+      color: #333;
+      text-align: center;
+    }
+
+    .section input,
+    .section textarea {
+      width: 100%;
+      padding: 11px 14px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .section input:focus,
+    .section textarea:focus {
+      border-color: #764ba2;
+    }
+
+    .section textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .section button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .teacher-check {
+       display: flex; align-items: center;
+        gap: 10px; margin: 14px 0 18px; font-size: 15px;
+         color: #1f2430; cursor: pointer; user-select: none;
+         }
+    .teacher-check input {
+           appearance: none; -webkit-appearance: none;
+            width: 22px; height: 22px;
+             border: 2px solid #2b6cb0; 
+             border-radius: 6px; background: #fff; 
+             cursor: pointer; position: relative; flex-shrink: 0; 
+             transition: background 0.15s, border-color 0.15s; }
+              .teacher-check input:checked { 
+                background: #2b6cb0; } 
+                .teacher-check input:checked::after 
+                { content: "✓"; position: absolute; inset: 0;
+                 display: flex; align-items: center; justify-content: center;
+                  color: #fff; font-size: 14px; font-weight: 700; }
+                   .teacher-check input:focus-visible {
+                     outline: 2px solid #93c5fd; outline-offset: 2px; }
+
+    .section button:hover { opacity: 0.9; }
+    #register button,
+#login button,
+#feedback button {
+  display: block;
+  width: auto;
+  min-width: 160px;
+  padding: 10px 18px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 6px;
+  background: #2b6cb0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#register button:hover,
+#login button:hover,
+#feedback button:hover {
+  background: #245a96;
+}
+  </style>
 </head>
-
 <body>
-    <div id="register" class="section" style="display:none;">
-        <h2>Регистрация</h2>
-        <input type="text" id="regName" placeholder="Имя" required>
-        <input type="email" id="regEmail" placeholder="Email" required>
-        <input type="password" id="regPassword" placeholder="Пароль" required>
-        <button onclick="register()">Зарегистрироваться</button>
-    </div> 
-    <div id="login" class="section" style="display:none;">
-        <h2>Вход</h2>
-        <input type="email" id="loginEmail" placeholder="Email" required>
-        <input type="password" id="loginPassword" placeholder="Пароль" required>
-        <button onclick="login()">Войти</button>
-    </div> 
-    <div id="feedback" class="section" style="display:none;">
-        <h2>Обратная связь</h2>
-        <input type="text" id="feedbackName" placeholder="Ваше имя" required>
-        <textarea id="feedbackMessage" placeholder="Ваше сообщение..." required></textarea>
-        <button onclick="sendFeedback()">Отправить</button>
-    </div>
-    <script>
-    const BASE_URL = "http://localhost:3000";
-    let currentUser = null; 
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(sectionId).style.display = 'block';
-        }
-        async function register() {
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            try {
-                const response = await fetch('http://localhost:5000/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
-                const data = await response.json();
-                alert(data.message);
-                if (response.ok) showSection('login');
-            } catch (error) {
-                alert('Ошибка при регистрации');
-            }
-        }
-        async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            try {
-                const response = await fetch('http://localhost:5000/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    currentUser = data.user;
-                    localStorage.setItem('token', data.token);
-                    alert('Вы вошли как ' + currentUser.name);
-                    showSection('dashboard'); 
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                alert('Ошибка при входе');
-            }
-        }
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('token');
-            alert('Вы вышли из системы');
-            showSection('login');
-        }
-        async function sendFeedback() {
-            if (!currentUser) {
-                alert('Сначала войдите в систему');
-                return;
-            }
-            const name = document.getElementById('feedbackName').value;
-            const message = document.getElementById('feedbackMessage').value;
-            const token = localStorage.getItem('token');
-            try {
-                const response = await fetch('http://localhost:5000/api/feedback', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ name, message })
-                });
-                const data = await response.json();
-                alert(data.message);
-            } catch (error) {
-                alert('Ошибка при отправке обратной связи');
-            }
-        }</script>
-</body>
+  <h1>Smart Timetable Maker</h1>
 
+  <div class="tabs">
+    <button id="tab-login" class="active" onclick="showSection('login')">Вход</button>
+    <button id="tab-register" onclick="showSection('register')">Регистрация</button>
+    <button id="tab-feedback" onclick="showSection('feedback')">Обратная связь</button>
+  </div>
+
+<div id="login" class="section">
+  <h2>Вход</h2>
+  <input type="email" id="loginEmail" placeholder="Email" required>
+  <input type="password" id="loginPassword" placeholder="Пароль" required>
+
+  <!-- Чекбокс роли -->
+  <label style="display:block; margin: 10px 0; font-size: 15px; color: #333; cursor: pointer; user-select: none;">
+    <input type="checkbox" id="isTeacherLogin">
+    Я преподаватель
+  </label>
+
+  <!-- Чекбокс отзыва -->
+  <label style="display:block; margin: 10px 0; font-size: 15px; color: #333; cursor: pointer; user-select: none;">
+    <input type="checkbox" id="leaveFeedback">
+    Оставить отзыв
+  </label>
+
+  <button onclick="login()">Войти</button>
+</div>
+
+  <!-- Форма регистрации -->
+  <div id="register" class="section" style="display:none;">
+    <h2>Регистрация</h2>
+    <input type="text" id="regName" placeholder="Имя" required>
+    <input type="email" id="regEmail" placeholder="Email" required>
+    <input type="password" id="regPassword" placeholder="Пароль" required>
+
+    <label class="teacher-check">
+      <input type="checkbox" id="regIsTeacher">
+      <span>Я преподаватель</span>
+    </label>
+
+    <button onclick="register()">Зарегистрироваться</button>
+  </div>
+
+  <!-- Форма обратной связи -->
+  <div id="feedback" class="section">
+    <h2>Обратная связь</h2>
+    <input type="text" id="feedbackName" placeholder="Ваше имя" required>
+    <textarea id="feedbackMessage" placeholder="Ваше сообщение..." required></textarea>
+    <button onclick="sendFeedback()">Отправить</button>
+  </div>
+
+  <script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  // Регистрация
+  async function register() {
+    const isTeacher = document.getElementById('regIsTeacher').checked;
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, isTeacher })
+      });
+      const data = await response.json();
+      alert(data.message);
+
+      if (response.ok) {
+        if (isTeacher) {
+          window.location.href = 'index.html';
+        } else {
+          window.location.href = 'std.html';
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Ошибка соединения с сервером');
+    }
+  }
+
+  // Вход
+  function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const isTeacher = document.getElementById('isTeacherLogin').checked;
+  const leaveFeedback = document.getElementById('leaveFeedback').checked;
+
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Переход по роли и чекбоксу отзыва
+        if (isTeacher) {
+          window.location.href = 'index.html'; // преподаватель
+        } else {
+          if (leaveFeedback) {
+            showSection('feedback'); // студент хочет оставить отзыв
+          } else {
+            window.location.href = 'std.html'; // студент сразу на свою страницу
+          }
+        }
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(() => alert('Ошибка соединения с сервером'));
+}
+
+  // Обратная связь — здесь исправлен адрес запроса
+  async function sendFeedback() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Сначала войдите в систему');
+      return;
+    }
+
+    const name = document.getElementById('feedbackName')?.value.trim();
+    const message = document.getElementById('feedbackMessage')?.value.trim();
+
+    if (!name || !message) {
+      alert('Заполните имя и сообщение');
+      return;
+    }
+
+    try {
+      // Используем относительный путь /api/feedback — браузер сам подставит хост и порт
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, message })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || 'Обратная связь отправлена');
+        document.getElementById('feedbackName').value = '';
+        document.getElementById('feedbackMessage').value = '';
+      } else {
+        alert(data.message || 'Ошибка при отправке');
+      }
+    } catch (error) {
+      console.error('Ошибка сети:', error);
+      alert('Не удалось связаться с сервером. Проверьте, запущен ли он.');
+    }
+  }
+</script>
+</body>
 </html>

@@ -1,14 +1,24 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "description": "\"SMART CLASSROOM & TIMETABLE MAKER\"",
+  "keywords": [],
+  "homepage": "https://github.com/kollen25/02#readme",
+  "bugs": {
+    "url": "https://github.com/kollen25/02/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kollen25/02.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
@@ -19,13 +29,5 @@
     "mysql2": "^3.24.6",
     "sqlite3": "^5.1.7"
   },
-  "description": "\"SMART CLASSROOM & TIMETABLE MAKER\"",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kollen25/02.git"
-  },
-  "bugs": {
-    "url": "https://github.com/kollen25/02/issues"
-  },
-  "homepage": "https://github.com/kollen25/02#readme"
+  "devDependencies": {}
 }
